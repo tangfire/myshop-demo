@@ -7,7 +7,7 @@
                 :class="activeClass == item ? 'active':''"
                 @mouseover="mouseover($event,item)"
             >
-            <router-link>
+            <router-link to>
                 <slot :name="item"></slot>
             </router-link>
             </li>
@@ -29,6 +29,29 @@ export default {
     mouseover (e, val) {
       this.activeClass = val
     }
+  },
+  watch: {
+    // 向父组件传过去当前要显示的商品分类，从而更新商品列表
+    activeClass: function (val) {
+      this.$emit('from-child', val)
+    }
   }
 }
 </script>
+
+<style scoped>
+#myMenu li {
+  float: left;
+  margin-left: 30px;
+}
+
+#myMenu a:hover {
+  color: #ff6700;
+  border-bottom: 2px solid #ff6700;
+}
+
+#myMenu .active a {
+  color: #ff6700;
+  border-bottom: 2px solid #ff6700;
+}
+</style>
