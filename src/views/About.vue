@@ -42,7 +42,7 @@ export default {
   line-height: 64px;
   font-size: 28px;
 }
-.about .content {
+/* .about .content {
   padding: 20px 0;
   width: 1225px;
   margin: 0 auto;
@@ -50,7 +50,7 @@ export default {
 .about .content .goods-list {
   margin-left: -13.7px;
   overflow: hidden;
-}
+} */
 .about .about-content {
   width: 1225px;
   margin: 0 auto;

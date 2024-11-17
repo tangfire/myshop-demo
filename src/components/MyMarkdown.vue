@@ -1,17 +1,16 @@
-<!--
- * @Description: 渲染markdown文件
- * @Author: hai-27
- * @Date: 2020-03-12 17:30:46
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-12 18:23:58
- -->
- <template>
+<template>
     <div id="my-markdown" class="markdown-body">
       <vue-markdown :source="md"></vue-markdown>
     </div>
   </template>
+
 <script>
+// 引入 VueMarkdown 组件
 import VueMarkdown from 'vue-markdown'
+
+// 这里根据 Webpack 配置，你可能需要直接导入 Markdown 文件内容
+import markdownFile from '@/assets/content.md' // 请根据实际路径调整
+
 export default {
   name: 'MyMarkdown',
   components: {
@@ -19,22 +18,12 @@ export default {
   },
   data () {
     return {
-      md: ''
+      md: markdownFile // 直接将导入的 Markdown 内容赋值给 `md`
     }
-  },
-  created () {
-    // 从后端请求README.md
-    this.$axios
-      .get('/api/public/docs/README.md', {})
-      .then(res => {
-        this.md = res.data
-      })
-      .catch(err => {
-        return Promise.reject(err)
-      })
   }
 }
 </script>
+
   <style>
   @import "../assets/css/github-markdown.css";
   .markdown-body {
