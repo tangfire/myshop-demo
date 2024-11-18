@@ -119,7 +119,7 @@
 export default {
   data () {
     return {
-      visiable: true,
+      visiable: false,
       getNum: 1,
       search: ''
     }
