@@ -5,20 +5,20 @@
         <div class="topbar">
             <div class="nav">
                 <ul>
-                    <li>
+                    <li v-if="!getUser">
                         <el-button type="text" @click="login">登录</el-button>
                         <span class="sep">|</span>
                         <el-button type="text" @click="register = true">注册</el-button>
                     </li>
-                    <li>
+                    <li v-else>
                         欢迎━(*｀∀´*)ノ亻!
-                        <el-popover placement="top" width="180" v-model="visiable">
+                        <el-popover placement="top" width="180" v-model="visible">
                             <p>确定退出登录吗?</p>
                             <div style="text-align: right; margin: 10px 0 0">
-                                <el-button size="mini" type="primary" @click="visiable = false">取消</el-button>
+                                <el-button size="mini" type="primary" @click="visible = false">取消</el-button>
                                 <el-button size="mini" type="primary" @click="logout">确定</el-button>
                             </div>
-                            <el-button type="text" slot="reference">hello popover</el-button>
+                            <el-button type="text" slot="reference">{{getUser.userName}}</el-button>
                         </el-popover>
                     </li>
                     <li>
@@ -30,8 +30,8 @@
                     </li>
                     <li :class="getNum > 0 ? 'shopCart-full' : 'shopCart'">
                         <router-link to="/shoppingCart">
-                            <i></i>购物车
-                            <span>(123)</span>
+                          <i class="el-icon-shopping-cart-full"></i> 购物车
+                          <span class="num">({{getNum}})</span>
                         </router-link>
                     </li>
 
@@ -67,8 +67,9 @@
         <!-- 顶栏容器END -->
 
         <!-- 登录模块 -->
-
+        <MyLogin></MyLogin>
         <!-- 注册模块 -->
+        <MyRegister :register="register" @from-child="isRegister"></MyRegister>
 
         <!-- 主要区域模块 -->
         <el-main>
@@ -115,13 +116,54 @@
 </template>
 
 <script>
-
+import { mapActions, mapGetters } from 'vuex'
 export default {
+  beforeUpdate () {
+    this.activeIndex = this.$route.path
+  },
   data () {
     return {
-      visiable: false,
-      getNum: 1,
-      search: ''
+      visible: false,
+      search: '',
+      register: false,
+      activeIndex: ''
+    }
+  },
+  created () {
+    // 获取浏览器localStorage，判断用户是否已经登录
+    if (localStorage.getItem('user')) {
+      // 如果已经登录，设置vuex登录状态
+      this.setUser(JSON.parse(localStorage.getItem('user')))
+    }
+  },
+  computed: {
+    ...mapGetters(['getUser', 'getNum'])
+  },
+  watch: {
+    // 获取vuex的登录状态
+    getUser: function (val) {
+      if (val === '') {
+        // 用户没有登录
+        this.setShoppingCart([])
+      } else {
+        // 用户已经登录，获取该用户的购物车信息
+        this.$axios
+          .post('/api/user/shoppingCart/getShoppingCart', {
+            user_id: val.user_id
+          })
+          .then(res => {
+            if (res.data.code === '001') {
+              // 001 为成功，更新vuex购物车状态
+              this.setShoppingCart(res.data.shoppingCartData)
+            } else {
+              // 提示失败信息
+              this.notifyError(res.data.msg)
+            }
+          })
+          .catch(err => {
+            return Promise.reject(err)
+          })
+      }
     }
   },
   methods: {
@@ -135,6 +177,27 @@ export default {
         })
         this.search = ''
       }
+    },
+    ...mapActions(['setUser', 'setShowLogin', 'setShoppingCart']),
+    login () {
+      // 点击登录按钮, 通过更改vuex的showLogin值显示登录组件
+      // console.log('login')
+      this.setShowLogin(true)
+      // const v = this.$store.getters.getShowLogin
+      // console.log('v = ', v)
+    },
+    // 接收注册子组件传过来的数据
+    isRegister (val) {
+      this.register = val
+    },
+    // 退出登录
+    logout () {
+      this.visible = false
+      // 清空本地登录信息
+      localStorage.setItem('user', '')
+      // 清空vuex登录信息
+      this.setUser('')
+      this.notifySucceed('成功退出登录')
     }
   }
 }
